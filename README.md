@@ -1,1 +1,4 @@
-# document
+# Document
+
+/infrastructure
+/architecture
