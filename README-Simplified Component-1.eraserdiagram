@@ -1,0 +1,62 @@
+cloud-architecture-diagram
+
+title Simplified Component
+
+http [icon: client, label: "HTTP/HTTPS"]
+ssh [icon: client, label: SSH]
+
+GitLab Layers [icon: layers] {
+  Core Layers [icon: layers] {
+    nginx [icon: nginx, label: Nginx]
+    gitlab-shell [icon: server, label: "GitLab Shell"]
+
+    Processors Layer [icon: layers] {
+      gitlab-pages [icon: gitlab, label: "GitLab Pages (static assets)"]
+      gitlab-workhorse[icon: gitlab, label: "GitLab Workhorse"]
+
+      sidekiq [icon: ruby, label: "Sidekiq (background job processor)"]
+      puma [icon: ruby, label: "Puma (application server)"]
+    }
+
+    Data Layer [icon: layers] {
+      postgresql [icon: postgres, label: PostgreSQL]
+      redis [icon: redis, label: Redis]
+      gitaly [icon: git, label: Gitaly]
+    }
+  }
+
+  Monitoring Layer [icon: layers] {
+    grafana [icon: grafana, label: Grafana]  
+    prometheus [icon: prometheus, label: Prometheus]
+
+    node-exoprter [icon: trending-up, label: "Node Exporter"]
+    gitlab-exporter [icon: trending-up, label: "GitLab Exporter"]
+    redis-exporter [icon: trending-up, label: "Redis Exporter"]
+    postgresql-exporter [icon: trending-up, label: "PostgreSQL Exporter"]
+  }
+}
+
+ 
+runner [icon: GitLab, label: "GitLab Runners"]
+
+// External
+http > nginx 
+ssh > gitlab-shell
+runner > nginx
+
+// core
+nginx > gitlab-pages
+nginx, gitlab-shell > gitlab-workhorse
+gitlab-shell > gitaly
+
+//data
+gitlab-workhorse > redis, puma, gitaly
+puma > redis, postgresql, gitaly
+sidekiq > redis, postgresql
+gitaly > gitlab-workhorse
+
+// monitoring
+nginx > grafana
+grafana > prometheus
+prometheus > node-exoprter, gitlab-exporter, redis-exporter, postgresql-exporter
+
